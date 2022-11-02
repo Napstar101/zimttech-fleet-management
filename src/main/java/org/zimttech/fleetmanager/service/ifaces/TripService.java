@@ -8,9 +8,9 @@ import java.util.List;
 public interface TripService {
     Trip driverRequestTrip(TripRequestDto tripRequestDto);
     Trip approveTripRequest(Long tripId, String assignedVehicleReg);
-
+    Trip rejectTripRequest(Long tripId);
     Trip driverEndTrip(Long tripId);
     Trip driverStartTrip(Long tripId);
-
     List<Trip> getCurrentTrips();
+    List<Trip> getDriverPastAndCurrentTrips(Long driverId);
 }

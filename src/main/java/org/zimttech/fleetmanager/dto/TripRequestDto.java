@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import org.zimttech.fleetmanager.enums.TripStatus;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
@@ -15,7 +16,9 @@ public class TripRequestDto {
 
     private BigDecimal distance;
 
-    private TripStatus status;
-
     private Long driverId;
+
+    private LocalDate startDate;
+
+    private LocalDate expectedEndDate;
 }

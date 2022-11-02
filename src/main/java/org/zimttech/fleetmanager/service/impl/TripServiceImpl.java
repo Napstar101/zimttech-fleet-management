@@ -11,9 +11,11 @@ import org.zimttech.fleetmanager.enums.TripStatus;
 import org.zimttech.fleetmanager.repository.TripRepository;
 import org.zimttech.fleetmanager.repository.UserRepository;
 import org.zimttech.fleetmanager.service.ifaces.TripService;
+import org.zimttech.fleetmanager.utils.VehicleRegistrationValidator;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,6 +39,8 @@ public class TripServiceImpl implements TripService {
             trip.setStatus(TripStatus.PENDING_APPROVAL);
             trip.setDistance(tripRequestDto.getDistance());
             trip.setDriver(driver);
+            trip.setExpectedEndDate(tripRequestDto.getExpectedEndDate());
+            trip.setStartDate(tripRequestDto.getStartDate());
             trip.setIsDriverEndedTrip(Boolean.FALSE);
 
             return tripRepository.save(trip);
@@ -46,6 +50,10 @@ public class TripServiceImpl implements TripService {
 
     @Override
     public Trip approveTripRequest(Long tripId, String assignedVehicleReg) {
+
+       if(!VehicleRegistrationValidator.isVehicleRegistrationValid(assignedVehicleReg))
+           throw new IllegalArgumentException("Vehicle Registration is not Valid");
+
         Optional<Trip> optionalTrip = tripRepository.findById(tripId);
 
         return optionalTrip.map(trip->{
@@ -54,6 +62,16 @@ public class TripServiceImpl implements TripService {
             return tripRepository.save(trip);
         }).orElse(null);
 
+    }
+
+    @Override
+    public Trip rejectTripRequest(Long tripId) {
+        Optional<Trip> optionalTrip = tripRepository.findById(tripId);
+
+        return optionalTrip.map(trip->{
+            trip.setStatus(TripStatus.DECLINED);
+            return tripRepository.save(trip);
+        }).orElse(null);
     }
 
     @Override
@@ -80,5 +98,11 @@ public class TripServiceImpl implements TripService {
     @Override
     public List<Trip> getCurrentTrips() {
         return tripRepository.findAllByStatus(TripStatus.IN_PROGRESS);
+    }
+
+    @Override
+    public List<Trip> getDriverPastAndCurrentTrips(Long driverId) {
+        Optional<User> optionalDriver = userRepository.findById(driverId);
+        return optionalDriver.map(driver-> tripRepository.findAllByDriver(driver)).orElse(new ArrayList<>());
     }
 }
